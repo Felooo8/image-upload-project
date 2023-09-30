@@ -16,3 +16,11 @@ class Tier(models.Model):
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     tier = models.ForeignKey(Tier, on_delete=models.SET_NULL, null=True, blank=True)
+
+class Image(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/')
+    upload_timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image uploaded by {self.user.username}"
