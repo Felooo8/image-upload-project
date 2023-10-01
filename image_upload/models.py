@@ -23,4 +23,12 @@ class Image(models.Model):
     upload_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Image uploaded by {self.user.username}"
+        return f"Image uploaded by {self.user.username} at {self.upload_timestamp.strftime('%Y-%m-%d')}"
+
+class ThumbnailImage(models.Model):
+    original_image = models.ForeignKey(Image, on_delete=models.CASCADE)
+    thumbnail = models.ImageField(upload_to='thumbnails/')
+    thumbnail_size = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"Thumbnail for {self.original_image} - Size: {self.thumbnail_size}"

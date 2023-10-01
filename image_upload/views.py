@@ -1,8 +1,8 @@
+from image_upload.image_utils import generate_thumbnails
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.parsers import FileUploadParser
-from .models import Image
+from .models import Image, Account
 from .serializers import ImageSerializer
 
 class ListImageView(APIView):
@@ -13,10 +13,11 @@ class ListImageView(APIView):
 
 
 class ImageUploadView(APIView):
-    parser_classes = (FileUploadParser,)
     def post(self, request, format=None):
         serializer = ImageSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            image = serializer.save(user=request.user)
+            account = Account.objects.get(user=request.user)
+            generate_thumbnails(image, account)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

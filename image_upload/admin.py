@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Account, Tier, Image
+from .models import Account, Tier, Image, ThumbnailImage
 
 # Register your models here.
 
@@ -18,7 +18,11 @@ class TierAdmin(admin.ModelAdmin):
 class ImageAdmin(admin.ModelAdmin):
     pass
 
+class ThumbnailImageAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Tier, TierAdmin)
 admin.site.register(Image, ImageAdmin)
+admin.site.register(ThumbnailImage, ThumbnailImageAdmin)

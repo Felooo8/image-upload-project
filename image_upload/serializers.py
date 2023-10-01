@@ -13,8 +13,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email')
 
 class ImageSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
     class Meta:
         model = Image
-        fields = '__all__'
+        fields = ('id', 'image')
