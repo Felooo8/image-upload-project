@@ -28,7 +28,7 @@ class Image(models.Model):
 class ThumbnailImage(models.Model):
     original_image = models.ForeignKey(Image, on_delete=models.CASCADE)
     thumbnail = models.ImageField(upload_to='thumbnails/')
-    thumbnail_size = models.CharField(max_length=20)
+    thumbnail_size = models.PositiveIntegerField()
 
     def __str__(self):
         return f"Thumbnail for {self.original_image} - Size: {self.thumbnail_size}"

@@ -3,34 +3,49 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from rest_framework import status
-from .models import Image, Account
-from .serializers import ImageSerializer
+from .models import Image, Account, ThumbnailImage
+from .serializers import ImageSerializer, ThumbnailImageSerializer
 from django.core.signing import BadSignature
 from django.core import signing
 
 
 class ListImageView(APIView):
     def get(self, request, format=None):
+        account = Account.objects.get(user=request.user)
+        response_data = []
         images = Image.objects.filter(user=request.user)
-        serializer = ImageSerializer(images, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
+        for image in images:
+            data = {}
+            if account.tier.link_to_original:
+                serializer = ImageSerializer(image, context={'request': request})
+                data['original'] = serializer.data
+
+            thumbnails = ThumbnailImage.objects.filter(original_image=image)
+            thumbnail_serializer = ThumbnailImageSerializer(thumbnails, many=True, context={'request': request})
+            data['thumbnails'] = thumbnail_serializer.data
+
+            response_data.append(data)
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 class ImageUploadView(APIView):
     parser_classes = (MultiPartParser,)
 
     def post(self, request, format=None):
 
-        serializer = ImageSerializer(data=request.data)
+        serializer = ImageSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             image = serializer.save(user=request.user)
             account = Account.objects.get(user=request.user)
-            thumbnail_urls = generate_thumbnails(image, account)
+            thumbnail_urls = generate_thumbnails(image, account, request)
 
             response_data = {
                 "thumbnails": thumbnail_urls,
-                "original_image": serializer.data if account.tier.link_to_original else None,
             }
+
+            if account.tier.link_to_original:
+                response_data["original_image"] = serializer.data
 
             if account.tier.expiring_link:
                 expiration_seconds = int(request.data.get('expiration', 3600))  # Default to 1 hour if not specified

@@ -2,7 +2,6 @@ from PIL import Image as PILImage
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core import signing
-
 from image_upload.models import ThumbnailImage
 
 def generate_thumbnail(image, size, id):
@@ -15,7 +14,7 @@ def generate_thumbnail(image, size, id):
         thumbnail_name = f"image_{id}_size_{size}.png"
         return ContentFile(thumbnail_content, name=thumbnail_name)
 
-def generate_thumbnails(image, account):
+def generate_thumbnails(image, account, request):
     thumbnail_urls = {}
     # Extracting thumbnail sizes from the string and converting to a list of integers
     thumbnail_sizes = [int(size.strip()) for size in account.tier.thumbnail_sizes.split(',') if size.strip()]
@@ -28,10 +27,10 @@ def generate_thumbnails(image, account):
             thumbnail=thumbnail_content,
             thumbnail_size=size
         )
-        thumbnail_urls[f"{size}px"] = thumbnail_image.thumbnail.url
+        thumbnail_url = request.build_absolute_uri(thumbnail_image.thumbnail.url)
+        thumbnail_urls[f"{size}px"] = thumbnail_url
 
     return thumbnail_urls
-
 
 def sign_image_url(image_url, expiration_seconds):
     signed_url = signing.dumps(image_url)
