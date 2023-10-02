@@ -14,10 +14,10 @@ def generate_thumbnail(image, size, id):
         thumbnail_name = f"image_{id}_size_{size}.png"
         return ContentFile(thumbnail_content, name=thumbnail_name)
 
-def generate_thumbnails(image, account, request):
+def generate_thumbnails(image, thumbnail_sizes, request):
     thumbnail_urls = {}
     # Extracting thumbnail sizes from the string and converting to a list of integers
-    thumbnail_sizes = [int(size.strip()) for size in account.tier.thumbnail_sizes.split(',') if size.strip()]
+    thumbnail_sizes = [int(size.strip()) for size in thumbnail_sizes.split(',') if size.strip()]
 
     for size in thumbnail_sizes:
         thumbnail_content = generate_thumbnail(image, size, image.id)
