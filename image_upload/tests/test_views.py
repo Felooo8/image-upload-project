@@ -18,8 +18,8 @@ class ImageViewTests(APITestCase):
         self.account_2 = Account.objects.create(user=self.user_2, tier=self.tier_2)
         self.user_no_account = User.objects.create_user(username='testuser_no_account', password='testpassword')
 
-        image = create_image(None, 'image.png')
-        image_file = SimpleUploadedFile('image_file.png', image.getvalue())
+        fake_image = create_image(None, 'image.png')
+        image_file = SimpleUploadedFile('image_file.png', fake_image.getvalue())
         self.image = Image.objects.create(user=self.user, image=image_file)
         self.image_2 = Image.objects.create(user=self.user_2, image=image_file)
 
@@ -78,7 +78,7 @@ class ImageViewTests(APITestCase):
         response = self.client_2.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data['thumbnails']), 2)
-        self.assertEqual(response.data['expiring_link'][-3:], '500')
+        self.assertEqual(response.data['expiring_link'][-3:], '500') # ending ?exp=500
 
     def test_image_upload_view_fail(self):
         url = reverse('image-upload')
