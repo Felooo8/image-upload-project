@@ -89,3 +89,36 @@ class ImageExpiringLinkView(APIView):
             data = {"Error": "Invalid signature"}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+
+class CreateExpiringLink(APIView):
+    def post(self, request, image_id, format=None):
+
+        if not image_id.isdigit():
+            return Response({"Error": "Invalid image id format."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            image = Image.objects.get(id=image_id)
+        except Image.DoesNotExist:
+            return Response({"Error": "Image not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            account = Account.objects.get(user=request.user)
+        except Account.DoesNotExist:
+            return Response({"Error": "Account not found for the current user."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not account.tier.expiring_link:
+            return Response({"Error": "You do not have permission to create an expiring link. Please upgrade your plan."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            expiration_seconds = int(request.data.get('expiration', 3600))  # Default to 1 hour if not specified
+        except (TypeError, ValueError):
+            expiration_seconds = 3600
+        expiration_seconds = max(300, min(expiration_seconds, 30000))  # Ensure within the range 300-30000
+
+        expiring_link = sign_image_url(image.image.url, expiration_seconds, request)
+        
+        response_data = {
+            "expiring_link": expiring_link
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)

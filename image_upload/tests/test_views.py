@@ -131,3 +131,36 @@ class ImageViewTests(APITestCase):
         url = reverse('expiring_image', args=[signed_url, signed_exp])
         response = self.client_unauthorized.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+############### GENERATE EXPIRING LINK #################
+    def test_create_expiring_link(self):
+        url = reverse('expiring-link', args=[self.image.id])
+        data = {'expiration': 500}
+        response = self.client_2.post(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('expiring_link', response.data)
+
+    def test_create_expiring_link_invalid_image_id_format(self):
+        url = reverse('expiring-link', args=["asd"])  # Invalid image ID
+        data = {'expiration': 500}
+        response = self.client_2.post(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {"Error": "Invalid image id format."})
+
+    def test_create_expiring_link_does_not_exist(self):
+        url = reverse('expiring-link', args=[999])  # Invalid image ID
+        data = {'expiration': 500}
+        response = self.client_2.post(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {"Error": "Image not found."})
+
+    def test_create_expiring_link_no_permission(self):
+        url = reverse('expiring-link', args=[self.image.id])
+        data = {'expiration': 500}
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {"Error": "You do not have permission to create an expiring link. Please upgrade your plan."})
