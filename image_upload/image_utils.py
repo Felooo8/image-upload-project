@@ -32,10 +32,14 @@ def generate_thumbnails(image, thumbnail_sizes, request):
 
     return thumbnail_urls
 
-def sign_image_url(image_url, expiration_seconds):
+def sign_image_url(image_url, expiration_seconds, request):
     signed_url = signing.dumps(image_url)
     signed_exp = signing.dumps(expiration_seconds)
 
-    signed_url_with_exp = f'{signed_url}/{signed_exp}?exp={expiration_seconds}'
+    signed_url_without_exp = f'/api/{signed_url}/{signed_exp}'
 
-    return signed_url_with_exp
+    signed_url_with_exp = f'{signed_url_without_exp}?exp={expiration_seconds}'
+
+    url = request.build_absolute_uri(signed_url_with_exp)
+
+    return url

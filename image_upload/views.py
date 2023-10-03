@@ -7,6 +7,7 @@ from .models import Image, Account, ThumbnailImage
 from .serializers import ImageSerializer, ThumbnailImageSerializer
 from django.core.signing import BadSignature
 from django.core import signing
+from rest_framework.permissions import AllowAny
 
 
 class ListImageView(APIView):
@@ -65,13 +66,14 @@ class ImageUploadView(APIView):
             except (TypeError, ValueError):
                 expiration_seconds = 3600
             expiration_seconds = max(300, min(expiration_seconds, 30000))  # Ensure within the range 300-30000
-            expiring_link = sign_image_url(image.image.url, expiration_seconds)
+            expiring_link = sign_image_url(image.image.url, expiration_seconds, request)
             response_data["expiring_link"] = expiring_link
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class ImageExpiringLinkView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, signed_url, signed_exp):
         if signed_url is None or signed_exp is None:
             data = {"Error": "Something went wrong"}
@@ -80,7 +82,8 @@ class ImageExpiringLinkView(APIView):
         try:
             expiration_seconds = signing.loads(signed_exp)
             image_url = signing.loads(signed_url, max_age=expiration_seconds)
-            data = {"url": image_url}
+            url = request.build_absolute_uri(image_url)
+            data = {f"Image Expiring Link ({expiration_seconds}s)": url}
             return Response(data, status=status.HTTP_200_OK)
         except BadSignature:
             data = {"Error": "Invalid signature"}
