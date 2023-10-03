@@ -29,13 +29,9 @@ class ListImageView(APIView):
             thumbnails = ThumbnailImage.objects.filter(original_image=image)
             thumbnail_serializer = ThumbnailImageSerializer(thumbnails, many=True, context={'request': request})
 
-            if not thumbnail_serializer.is_valid():
-                return Response(thumbnail_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
             data['thumbnails'] = thumbnail_serializer.data
 
             response_data.append(data)
-
         return Response(response_data, status=status.HTTP_200_OK)
 
 
