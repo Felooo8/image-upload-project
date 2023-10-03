@@ -17,13 +17,16 @@ class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     tier = models.ForeignKey(Tier, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"Account for {self.user.username}"
+
 class Image(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/')
     upload_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Image uploaded by {self.user.username} at {self.upload_timestamp.strftime('%Y-%m-%d')}"
+        return f"Image {self.id}"
 
 class ThumbnailImage(models.Model):
     original_image = models.ForeignKey(Image, on_delete=models.CASCADE)

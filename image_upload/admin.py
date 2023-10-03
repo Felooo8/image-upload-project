@@ -16,10 +16,22 @@ class TierAdmin(admin.ModelAdmin):
     pass
 
 class ImageAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('__str__', 'upload_timestamp', 'user')
+    list_filter = ('upload_timestamp', 'user')
+    search_fields = ('upload_timestamp', 'image', 'user__username')
 
 class ThumbnailImageAdmin(admin.ModelAdmin):
-    pass
+    
+    list_display = ('__str__', 'original_image', 'thumbnail_size', 'get_user_username')
+    list_filter = ('thumbnail_size', 'original_image__user')
+    search_fields = ('original_image__user__username',)
+
+    def get_user_username(self, obj):
+        return obj.original_image.user.username
+
+    get_user_username.admin_order_field = 'original_image__user__username'
+    get_user_username.short_description = 'Original Image User'
+
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
