@@ -10,7 +10,7 @@ This project is a Django application that allows users to upload images and gene
 2.  Clone the repository and inside main folder run the following command:
 
 ```
-docker run
+docker compose up
 ```
 
 ### Without Docker
