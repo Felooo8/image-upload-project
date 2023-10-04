@@ -19,7 +19,7 @@ docker compose up
 
    ```
    git clone https://github.com/Felooo8/image-upload-project
-   cd image_upload_project
+   cd image-upload-project/backend
    ```
 
 2. Install Python3:
@@ -29,6 +29,7 @@ docker compose up
 3. Install the project dependencies:
 
    ```
+   pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
